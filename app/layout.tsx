@@ -1,0 +1,16 @@
+import { Geist } from "next/font/google";
+
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+
+
+export default function MainLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="min-h-screen bg-background">
+      <main className="container mx-auto px-4 py-8">{children}</main>
+    </div>
+  );
+}
