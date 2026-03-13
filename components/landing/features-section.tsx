@@ -3,9 +3,9 @@ import SectionHeading from "./section-heading";
 
 const features = [
   {
-    title: "Matching that works",
+    title: "Emparejamiento inteligente",
     description:
-      "We look at your goals, skill level, and what you want to learn, then find someone who's a good fit. No swiping, no guessing.",
+      "Analizamos tus metas, nivel de habilidad y lo que quieres aprender, luego encontramos a alguien compatible. Sin deslizar, sin adivinanzas.",
     icon: (
       <svg
         className="h-6 w-6 text-primary"
@@ -23,9 +23,9 @@ const features = [
     ),
   },
   {
-    title: "Built-in chat",
+    title: "Chat integrado",
     description:
-      "Message your matches directly in the app. Plan sessions, share resources, or just check in on each other's progress.",
+      "Conversa con tus compañeros directamente en la app. Planifica sesiones, comparte recursos o manténganse al tanto del progreso mutuo.",
     icon: (
       <svg
         className="h-6 w-6 text-primary"
@@ -43,9 +43,9 @@ const features = [
     ),
   },
   {
-    title: "Auto summaries",
+    title: "Resúmenes automáticos",
     description:
-      "After each chat, get a quick summary of what you discussed and what to work on next. Keeps you accountable without the effort.",
+      "Después de cada chat, obtén un resumen rápido de lo que hablaron y los siguientes pasos. Te mantiene responsable sin esfuerzo adicional.",
     icon: (
       <svg
         className="h-6 w-6 text-primary"
@@ -63,9 +63,9 @@ const features = [
     ),
   },
   {
-    title: "Track your goals",
+    title: "Seguimiento de metas",
     description:
-      "Write down what you're learning and where you're at. Update it as you go. Simple goal tracking that doesn't get in your way.",
+      "Registra lo que estás aprendiendo y en qué punto te encuentras. Actualízalo sobre la marcha. Un seguimiento simple que no estorba.",
     icon: (
       <svg
         className="h-6 w-6 text-primary"
@@ -83,9 +83,9 @@ const features = [
     ),
   },
   {
-    title: "Join communities",
+    title: "Únete a comunidades",
     description:
-      "Find groups of people learning similar things. Whether it's coding, design, or YouTube, there's probably a community for it.",
+      "Encuentra grupos de personas aprendiendo temas similares. Ya sea programación, diseño o YouTube, probablemente hay una comunidad para eso.",
     icon: (
       <svg
         className="h-6 w-6 text-primary"
@@ -103,9 +103,9 @@ const features = [
     ),
   },
   {
-    title: "Quick setup",
+    title: "Configuración rápida",
     description:
-      "Sign up, fill out your profile, and you're ready to get matched. Takes a few minutes, not a few hours.",
+      "Regístrate, completa tu perfil y ya estás listo para encontrar compañeros. Toma minutos, no horas.",
     icon: (
       <svg
         className="h-6 w-6 text-primary"
@@ -129,8 +129,8 @@ export default function FeaturesSection() {
     <section className="section-container ">
       <div className="section-padding">
         <SectionHeading
-          title="Everything You Need to Learn Together"
-          description="Powerful features designed to help you find, connect, and learn with the right partners"
+          title="Todo lo que Necesitas para Aprender Juntos"
+          description="Funciones poderosas diseñadas para ayudarte a encontrar, conectar y aprender con los compañeros ideales"
         />
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
           {features.map((feature, idx) => (

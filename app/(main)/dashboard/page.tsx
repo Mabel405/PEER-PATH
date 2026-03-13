@@ -27,7 +27,7 @@ export default function DashboardPage() {
     queryFn: async () => {
       const res = await client.api.communities.$get();
       if (!res.ok) {
-        throw new Error("Failed to fetch communities");
+        throw new Error("Error al obtener las comunidades");
       }
       return res.json();
     },
@@ -38,7 +38,7 @@ export default function DashboardPage() {
     queryFn: async () => {
       const res = await client.api.matches["allmatches"].$get();
       if (!res.ok) {
-        throw new Error("Failed to fetch pending matches");
+        throw new Error("Error al obtener los matches pendientes");
       }
       return res.json();
     },
@@ -56,7 +56,7 @@ export default function DashboardPage() {
     queryFn: async () => {
       const res = await client.api.communities.goals.$get();
       if (!res.ok) {
-        throw new Error("Failed to fetch learning goals");
+        throw new Error("Error al obtener los objetivos de aprendizaje");
       }
       return res.json();
     },
@@ -69,50 +69,53 @@ export default function DashboardPage() {
     error: errorMatches,
   } = useMatches();
 
-  if (isLoadingUserCommunities) return <div>Loading...</div>;
+  if (isLoadingUserCommunities) return <div>Cargando...</div>;
   if (errorUserCommunities)
     return <div>Error: {errorUserCommunities.message}</div>;
 
   return (
     <div className="page-wrapper">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Panel de control</h1>
         <p className="text-muted-foreground">
-          Welcome back, {user?.user?.firstName || "User"}!
+          ¡Bienvenido de nuevo, {user?.user?.firstName || "Usuario"}!
         </p>
       </div>
 
       <Card className="border-primary">
         <CardHeader>
           <CardTitle>
-            🎉 You have {pendingMatchesData?.length} new{" "}
-            {pendingMatchesData?.length === 1 ? "match" : "matches"}!
+            🎉 Tienes {pendingMatchesData?.length}{" "}
+            {pendingMatchesData?.length === 1 ? "nuevo match" : "nuevos matches"}!
           </CardTitle>
           <CardDescription>
-            Review and accept your matches to start chatting
+            Revisa y acepta tus matches para comenzar a chatear
           </CardDescription>
         </CardHeader>
 
         <CardContent>
           <Link href="/chat">
-            <Button>Review Matches</Button>
+            <Button>Revisar Matches</Button>
           </Link>
         </CardContent>
       </Card>
 
       <div className="grid gap-4 md:grid-cols-4">
         <StatsCard
-          title="Your Communities"
-          value={userCommunities?.length || 0}
-        />
-        <StatsCard title="Learning Goals" value={learningGoals?.length || 0} />
-        <StatsCard
-          title="Active Matches"
-          value={activeMatchesData?.length || 0}
+          title="Tus comunidades"
+          value={userCommunities?.length || 2}
         />
         <StatsCard
-          title="Pending Matches"
-          value={pendingMatchesData?.length || 0}
+          title="Objetivos de aprendizaje"
+          value={learningGoals?.length || 3}
+        />
+        <StatsCard
+          title="Matches activos"
+          value={activeMatchesData?.length || 2}
+        />
+        <StatsCard
+          title="Matches pendientes"
+          value={pendingMatchesData?.length || 1}
         />
       </div>
 
@@ -122,16 +125,16 @@ export default function DashboardPage() {
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center">
                 <MessageCircleIcon className="size-4 mr-2 text-primary" />
-                Recent Chats
+                Chats recientes
               </CardTitle>
               <Link href="/chat">
                 <Button variant="outline" size="sm">
                   <UsersIcon className="size-4 mr-2 text-primary" />
-                  View All
+                  Ver todos
                 </Button>
               </Link>
             </div>
-            <CardDescription>Conversations you&apos;re part of</CardDescription>
+            <CardDescription>Conversaciones de las que formas parte</CardDescription>
           </CardHeader>
 
           <CardContent>
@@ -170,16 +173,16 @@ export default function DashboardPage() {
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center">
                 <UsersIcon className="size-4 mr-2 text-primary" />
-                Communities
+                Comunidades
               </CardTitle>
               <Link href="/communities">
                 <Button variant="outline" size="sm">
                   <UsersIcon className="size-4 mr-2 text-primary" />
-                  Manage
+                  Gestionar
                 </Button>
               </Link>
             </div>
-            <CardDescription>Communities you&apos;re part of</CardDescription>
+            <CardDescription>Comunidades de las que formas parte</CardDescription>
           </CardHeader>
 
           <CardContent>

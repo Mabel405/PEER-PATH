@@ -17,19 +17,19 @@ export default function AIMatching({
   const handleFindAIPartners = async () => {
     try {
       await aiPartnerMutation.mutateAsync(selectedCommunityId);
-      toast.success("AI partners found successfully");
+      toast.success("Compañeros de IA encontrados exitosamente");
     } catch (error) {
       console.error("Error finding ai partners", error);
-      toast.error("Failed to find ai partners");
+      toast.error("Error al encontrar compañeros con IA");
     }
   };
   return (
     <div className="text-center py-8">
       <div className="mb-4">
-        <h3 className="text-lg font-semibold mb-2">AI-Powered Matching</h3>
+        <h3 className="text-lg font-semibold mb-2">Emparejamiento con IA</h3>
         <p>
-          Our AI will analyze your learning goals and automatically match you
-          with the most compatible learning partners in this community.
+          Nuestra IA analizará tus metas de aprendizaje y te emparejará automáticamente
+          con los compañeros más compatibles en esta comunidad.
         </p>
       </div>
       <Button
@@ -38,16 +38,16 @@ export default function AIMatching({
         onClick={handleFindAIPartners}
       >
         {showLockIcon && <LockIcon className="size-4 text-muted-foreground" />}
-        🤖 Find Partners with AI
+        🤖 Encontrar Compañeros con IA
       </Button>
       {totalGoals > 0 && (
         <p className="mt-4 text-sm text-muted-foreground">
-          You have {totalGoals} learning goals set
+          Tienes {totalGoals} {totalGoals === 1 ? "meta" : "metas"} de aprendizaje {totalGoals === 1 ? "establecida" : "establecidas"}
         </p>
       )}
       {totalGoals === 0 && (
         <p className="mt-4 text-sm text-muted-foreground">
-          Add learning goals first to enable AI matching
+          Agrega metas de aprendizaje primero para activar el emparejamiento con IA
         </p>
       )}
     </div>

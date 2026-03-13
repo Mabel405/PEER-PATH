@@ -35,7 +35,7 @@ export default function AddLearningGoal({
       {showNewGoalForm ? (
         <div className="space-y-3 pt-3 border-t">
           <Textarea
-            placeholder="What do you want to learn?"
+            placeholder="¿Qué quieres aprender?"
             value={newGoalText}
             onChange={(e) => setNewGoalText(e.target.value)}
             rows={4}
@@ -51,14 +51,14 @@ export default function AddLearningGoal({
                 showLockIcon
               }
             >
-              Add Goal
+              Agregar Meta
             </Button>
             <Button
               size="sm"
               variant={"outline"}
               onClick={() => setShowNewGoalForm(false)}
             >
-              Cancel
+              Cancelar
             </Button>
           </div>
         </div>
@@ -72,7 +72,7 @@ export default function AddLearningGoal({
           {showLockIcon && (
             <LockIcon className="size-4 text-muted-foreground" />
           )}
-          <PlusIcon className="size-3" /> Add Learning Goal
+          <PlusIcon className="size-3" /> Agregar Meta de Aprendizaje
         </Button>
       )}
     </div>

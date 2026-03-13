@@ -18,10 +18,9 @@ export default function ChatPage() {
   const isPro = user?.isPro;
 
   const router = useRouter();
-
   const acceptMatchMutation = useAcceptMatch();
 
-  if (isLoadingMatches) return <div>Loading...</div>;
+  if (isLoadingMatches) return <div>Cargando...</div>;
   if (errorMatches) return <div>Error: {errorMatches.message}</div>;
 
   const acceptedMatches = matches?.filter(
@@ -31,7 +30,7 @@ export default function ChatPage() {
 
   let pendingMatchesToShow = [];
   if (!isPro) {
-    pendingMatchesToShow = pendingMatches?.slice(0, 1) || [];
+    pendingMatchesToShow = pendingMatches?.slice(0, 10) || [];
   } else {
     pendingMatchesToShow = pendingMatches || [];
   }
@@ -41,13 +40,13 @@ export default function ChatPage() {
 
   return (
     <div className="page-wrapper">
-      <h2 className="text-2xl font-semibold">Pending Matches</h2>
+      <h2 className="text-2xl font-semibold">Coincidencias Pendientes</h2>
 
       <div className="flex gap-4 overflow-x-scroll">
         {pendingMatchesToShow?.map((match) => {
           const partner = {
             id: match.partner.id || "",
-            name: match.partner.name || "Partner",
+            name: match.partner.name || "Compañero",
             imageUrl: match.partner.imageUrl ?? undefined,
           };
           return (
@@ -75,7 +74,7 @@ export default function ChatPage() {
                   {match.partnerGoals && match.partnerGoals.length > 0 && (
                     <div>
                       <p className="text-xs font-medium text-muted-foreground mb-2">
-                        Their Learning Goals:
+                        Sus metas de aprendizaje:
                       </p>
                       <div className="space-y-2">
                         {match.partnerGoals.map((g) => (
@@ -97,8 +96,8 @@ export default function ChatPage() {
                   disabled={acceptMatchMutation.isPending}
                 >
                   {acceptMatchMutation.isPending
-                    ? "Accepting..."
-                    : "Accept & Start Chatting"}
+                    ? "Aceptando..."
+                    : "Aceptar y empezar chat"}
                 </Button>
               </CardContent>
             </Card>
@@ -106,12 +105,12 @@ export default function ChatPage() {
         })}
       </div>
 
-      <h2 className="text-2xl font-semibold">Active Chats</h2>
+      <h2 className="text-2xl font-semibold">Chats Activos</h2>
       <div className="flex gap-4 overflow-x-scroll flex-col">
         {acceptedMatches?.map((match) => {
           const partner = {
             id: match.partner.id || "",
-            name: match.partner.name || "Partner",
+            name: match.partner.name || "Compañero",
             imageUrl: match.partner.imageUrl ?? undefined,
           };
           return (
@@ -134,13 +133,13 @@ export default function ChatPage() {
                   <div className="flex flex-wrap gap-2 mt-1">
                     {match.userGoals && (
                       <span className="text-xs text-muted-foreground">
-                        Your goals:{" "}
+                        Tus metas:{" "}
                         {match.userGoals.map((g) => g.title).join(", ")}
                       </span>
                     )}
                     {match.partnerGoals && match.partnerGoals.length > 0 && (
                       <span className="text-xs text-muted-foreground">
-                        Their goals:{" "}
+                        Sus metas:{" "}
                         {match.partnerGoals.map((g) => g.title).join(", ")}
                       </span>
                     )}

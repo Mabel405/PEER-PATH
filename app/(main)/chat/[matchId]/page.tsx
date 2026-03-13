@@ -9,15 +9,18 @@ export default async function ChatPage({
   params: Promise<{ matchId: string }>;
 }) {
   const { matchId } = await params;
+
   return (
     <div className="page-wrapper">
       <div>
         <Link href="/chat">
           <Button variant="outline">
-            <ArrowLeftIcon className="size-4" /> Back to Conversations
+            <ArrowLeftIcon className="size-4" /> Volver a Conversaciones
           </Button>
         </Link>
       </div>
+
+      {/* Interfaz de chat para la coincidencia seleccionada */}
       <ChatInterface matchId={matchId} />
     </div>
   );

@@ -1,5 +1,6 @@
 import { client } from "@/lib/api-client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 export const useCommunities = () => {
   return useQuery({
@@ -7,7 +8,7 @@ export const useCommunities = () => {
     queryFn: async () => {
       const res = await client.api.communities.$get();
       if (!res.ok) {
-        throw new Error("Failed to fetch communities");
+        throw new Error("Error al obtener las comunidades");
       }
       return res.json();
     },
@@ -20,7 +21,7 @@ export const useAllCommunities = () => {
     queryFn: async () => {
       const res = await client.api.communities.all.$get();
       if (!res.ok) {
-        throw new Error("Failed to fetch all communities");
+        throw new Error("Error al obtener todas las comunidades");
       }
       return res.json();
     },
@@ -35,7 +36,7 @@ export const useCommunityGoals = (communityId: string | null) => {
         param: { communityId: communityId! },
       });
       if (!res.ok) {
-        throw new Error("Failed to fetch community goals");
+        throw new Error("Error al obtener las metas de la comunidad");
       }
       return res.json();
     },
@@ -51,15 +52,44 @@ export const useJoinCommunity = () => {
         param: { communityId: communityId },
       });
       if (!res.ok) {
-        throw new Error("Failed to join community");
+        if (res.status === 409) {
+          throw new Error("Ya eres miembro de esta comunidad");
+        }
+        throw new Error("Error al unirse a la comunidad");
       }
       return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["communities"] });
+      queryClient.invalidateQueries({ queryKey: ["allCommunities"] });
     },
     onError: (error) => {
-      console.error("Error joining community", error);
+      console.error("Error al unirse a la comunidad", error);
+    },
+  });
+};
+
+// NUEVO: Hook para abandonar comunidad
+export const useLeaveCommunity = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (communityId: string) => {
+      const res = await client.api.communities[":communityId"].leave.$post({
+        param: { communityId: communityId },
+      });
+      if (!res.ok) {
+        throw new Error("Error al abandonar la comunidad");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["communities"] });
+      queryClient.invalidateQueries({ queryKey: ["allCommunities"] });
+      toast.success("Has abandonado la comunidad exitosamente");
+    },
+    onError: (error) => {
+      console.error("Error al abandonar la comunidad", error);
+      toast.error("Error al abandonar la comunidad");
     },
   });
 };

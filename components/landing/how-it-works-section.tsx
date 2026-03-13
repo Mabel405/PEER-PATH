@@ -3,24 +3,24 @@ import SectionHeading from "./section-heading";
 
 const steps = [
   {
-    title: "Pick a community",
+    title: "Elige una comunidad",
     description:
-      "Browse communities and join the ones that match what you're trying to learn.",
+      "Explora comunidades y únete a las que coincidan con lo que estás aprendiendo.",
   },
   {
-    title: "Add your goals",
+    title: "Añade tus metas",
     description:
-      "Tell us what you want to learn, where you're at, and what you're working on.",
+      "Cuéntanos qué quieres aprender, en qué nivel estás y en qué estás trabajando.",
   },
   {
-    title: "Get matched",
+    title: "Encuentra tu match",
     description:
-      "We'll find someone with similar goals and pair you up for accountability.",
+      "Te buscaremos alguien con metas similares y los emparejaremos para manteneros motivados.",
   },
   {
-    title: "Start learning",
+    title: "Empieza a aprender",
     description:
-      "Message your match, set up sessions, and help each other stay on track.",
+      "Conversa con tu compañero, programen sesiones y ayúdense mutuamente a mantener el rumbo.",
   },
 ];
 
@@ -29,8 +29,8 @@ export default function HowItWorksSection() {
     <section className="section-padding">
       <div className="section-container">
         <SectionHeading
-          title="How It Works"
-          description="Get matched with your ideal learning partner in four simple steps"
+          title="Cómo Funciona"
+          description="Encuentra a tu compañero de aprendizaje ideal en cuatro simples pasos"
         />
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
           {steps.map((step, idx) => (
