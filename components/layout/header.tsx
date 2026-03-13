@@ -25,7 +25,7 @@ export default function Header({ isStarter, isPremium, isPro }: HeaderProps) {
       <div className="layout-container">
         <div className="flex items-center gap-6">
           <Link href="/" className="font-bold text-xl space-x-2">
-            Meetsy
+            Peer Path
           </Link>
 
           {isSignedIn && (

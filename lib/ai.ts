@@ -1,5 +1,5 @@
 import { generateText } from "ai";
-import { openai } from "@ai-sdk/openai";
+import { groq } from "@ai-sdk/groq";
 import {
   createMatch,
   getGoalsByUserAndCommunity,
@@ -19,18 +19,9 @@ export const aiMatchUsers = async (
   communityId: string
 ) => {
   try {
-    //get current user's learning goals based on the community id
-    const currentUserGoals = await getGoalsByUserAndCommunity(
-      user.id,
-      communityId
-    );
-    //get all the other members in the same community and their learning goals
+    const currentUserGoals = await getGoalsByUserAndCommunity(user.id, communityId);
     const members = await getMembersInCommunity(communityId, user.id);
-
-    const existingMatches = await getUserMatchesInCommunity(
-      user.id,
-      communityId
-    );
+    const existingMatches = await getUserMatchesInCommunity(user.id, communityId);
 
     const existingMatchUserIds = new Set(
       existingMatches.map((m) => getPartnerUserId(m, user.id))
@@ -40,19 +31,14 @@ export const aiMatchUsers = async (
       .filter((m) => !existingMatchUserIds.has(m.user.id))
       .map((m) => m.user.id);
 
-    const goalsMap = await getGoalsByUsersAndCommunity(
-      potentialMemberIds,
-      communityId
-    );
+    const goalsMap = await getGoalsByUsersAndCommunity(potentialMemberIds, communityId);
 
     const potentialPartners = [];
     const memberWithoutGoals = [];
 
     for (const member of members) {
       if (existingMatchUserIds.has(member.user.id)) continue;
-
       const memberGoals = goalsMap.get(member.user.id) || [];
-
       if (memberGoals.length > 0) {
         potentialPartners.push({
           userId: member.user.id,
@@ -67,20 +53,10 @@ export const aiMatchUsers = async (
       }
     }
 
-    console.log("Current user goals:", currentUserGoals);
-    console.log("Total members:", members.length);
-    console.log("Potential partners:", potentialPartners.length);
-    console.log("Members without goals:", memberWithoutGoals);
-
     if (potentialPartners.length === 0) {
-      return {
-        matched: 0,
-        matches: [],
-        message: "No potential partners found with learning goals",
-      };
+      return { matched: 0, matches: [], message: "No potential partners found with learning goals" };
     }
 
-    // Use AI to analyze and match
     const prompt = `You are an AI matching assistant for a learning platform. Your job is to match learners with compatible learning partners.
 
 Current User: ${user.name}
@@ -88,48 +64,26 @@ Their Learning Goals:
 ${currentUserGoals.map((g) => `- ${g.title}: ${g.description}`).join("\n")}
 
 Potential Partners:
-${potentialPartners
-  .map(
-    (p, idx) => `
+${potentialPartners.map((p, idx) => `
 ${idx + 1}. ${p.username}
    Goals:
-   ${p.goals
-     .map(
-       (g: typeof learningGoals.$inferSelect) =>
-         `   - ${g.title}: ${g.description}`
-     )
-     .join("\n")}
-`
-  )
-  .join("\n")}
+   ${p.goals.map((g: { title: string; description: string }) => `   - ${g.title}: ${g.description}`).join("\n")}
+`).join("\n")}
 
-Task: Analyze the learning goals and identify the TOP 3 most compatible learning partners for ${
-      user.name
-    }.
+Task: Analyze the learning goals and identify the TOP 3 most compatible learning partners for ${user.name}.
 
 IMPORTANT MATCHING CRITERIA:
-1. Use SEMANTIC SIMILARITY - goals don't need exact title matches. For example:
-   - "Learn the basics of React" matches with "React Hooks deep dive" (both about React)
-   - "Next.js - App Router - Build and Ship an app" matches with "Next.js App Router" (both about Next.js App Router)
-   - "JavaScript fundamentals" matches with "JavaScript ES6+ features" (both about JavaScript)
-
+1. Use SEMANTIC SIMILARITY - goals don't need exact title matches.
 2. Look at BOTH title and description to understand what the person wants to learn
-
-3. Consider:
-   - Overlapping or complementary learning goals (even if worded differently)
-   - Similar skill levels or learning paths
-   - Potential for mutual learning and knowledge sharing
-   - Common interests and learning styles
-
-4. Be INCLUSIVE - if there's any reasonable connection between learning goals, include them as a potential match
+3. Consider overlapping or complementary learning goals
+4. Be INCLUSIVE - if there's any reasonable connection, include them
 
 Return ONLY a JSON array of partner indices (1-based) in order of compatibility. Return between 1-3 matches maximum.
 Example: [2, 5, 1] means partner #2 is the best match, then #5, then #1.
-
 Only return an empty array [] if there are truly NO partners with any related learning interests.`;
 
     const { text } = await generateText({
-      model: openai("gpt-4o-mini"),
+      model: groq("llama-3.3-70b-versatile"),
       prompt,
     });
 
@@ -142,50 +96,30 @@ Only return an empty array [] if there are truly NO partners with any related le
       jsonText = jsonText.replace(/^```\s*\n/, "").replace(/\n```\s*$/, "");
     }
 
-    console.log("Cleaned AI response:", jsonText);
-
     let matchIndices = [];
-
     try {
       matchIndices = JSON.parse(jsonText);
-      if (!Array.isArray(matchIndices)) {
-        console.warn("Invalid JSON format returned by AI");
-        matchIndices = [];
-      }
+      if (!Array.isArray(matchIndices)) matchIndices = [];
     } catch (error) {
-      console.warn("Invalid JSON format returned by AI", error);
       const arrayMatch = jsonText.match(/\[[\d,\s]+\]/);
       if (arrayMatch) {
         matchIndices = JSON.parse(arrayMatch[0]);
-        console.log("Extracted array from response:", matchIndices);
       } else {
-        console.warn("No valid match indices found in AI response");
         throw new Error("AI returned invalid response");
       }
     }
 
-    //create a new match record in the database
-
     const createdMatches = [];
-
     for (const idx of matchIndices) {
       const partnerIndex = idx - 1;
       if (partnerIndex >= 0 && partnerIndex < potentialPartners.length) {
         const partner = potentialPartners[partnerIndex];
         const match = await createMatch(user.id, partner.userId, communityId);
-        createdMatches.push({
-          ...match,
-          partnerName: partner.username,
-        });
+        createdMatches.push({ ...match, partnerName: partner.username });
       }
     }
 
-    console.log("Created matches:", createdMatches, createdMatches.length);
-
-    return {
-      matched: createdMatches.length,
-      matches: createdMatches,
-    };
+    return { matched: createdMatches.length, matches: createdMatches };
   } catch (error) {
     console.error("Error matching users", error);
     return {
@@ -200,7 +134,6 @@ export const generateAISummaries = async (
   conversationId: string,
   conversationMessages: (typeof messages.$inferSelect)[]
 ) => {
-  //get user details from the conversation
   const userIds = [...new Set(conversationMessages.map((m) => m.senderId))];
   const usersMap = await getUsersByIds(userIds);
 
@@ -211,7 +144,6 @@ export const generateAISummaries = async (
 
   const conversationText = formattedMessages.join("\n");
 
-  //prompt for the AI to generate a summary of the conversation
   const prompt = `You are an AI assistant that summarizes learning conversations between matched learning partners.
 
 Analyze the following conversation and provide:
@@ -229,15 +161,16 @@ Please format your response as JSON with this structure:
   "keyPoints": ["point 1", "point 2", ...],
   "actionItems": ["action item 1", "action item 2", ...],
   "nextSteps": ["step 1", "step 2", ...]
-}`;
-  //invoke AI
+}
+
+IMPORTANT: Respond entirely in Spanish.`;
+
   try {
     const { text } = await generateText({
-      model: openai("gpt-4o-mini"),
+      model: groq("llama-3.3-70b-versatile"),
       prompt,
     });
 
-    //format and parse the json
     let jsonText = text.trim();
     if (jsonText.startsWith("```json")) {
       jsonText = jsonText.replace(/^```json\s*\n/, "").replace(/\n```\s*$/, "");
@@ -263,12 +196,9 @@ Please format your response as JSON with this structure:
     console.error("Error generating AI summary", error);
     throw new Error("Error generating AI summary");
   }
-  //format and parse the json
-  //save the summary to the database
 };
 
 export const getLatestConversationSummary = async (conversationId: string) => {
-  //get the latest summary from the database
   const [summary] = await db
     .select()
     .from(conversationSummaries)
@@ -277,4 +207,82 @@ export const getLatestConversationSummary = async (conversationId: string) => {
     .limit(1);
 
   return summary || null;
+};
+
+export const generateTopicSuggestions = async (
+  conversationMessages: (typeof messages.$inferSelect)[],
+  userGoals: string[],
+  partnerGoals: string[]
+): Promise<string[]> => {
+  const recentMessages = conversationMessages.slice(-10);
+  const conversationContext = recentMessages.length > 0
+    ? recentMessages.map((m) => m.content).join("\n")
+    : "La conversación acaba de comenzar";
+
+  const prompt = `You are a learning assistant helping two study partners have productive conversations.
+
+Their learning goals:
+- User 1: ${userGoals.join(", ")}
+- User 2: ${partnerGoals.join(", ")}
+
+Recent conversation:
+${conversationContext}
+
+Suggest exactly 3 short conversation topic starters in Spanish that are relevant to their learning goals.
+Return ONLY a JSON array of 3 short strings (max 8 words each).
+Example: ["¿Cómo aplicas React en proyectos reales?", "¿Qué recursos usas para aprender?", "¿Cuál es tu mayor reto con JavaScript?"]`;
+
+  const { text } = await generateText({
+    model: groq("llama-3.3-70b-versatile"),
+    prompt,
+  });
+
+  let jsonText = text.trim();
+  if (jsonText.startsWith("```json")) {
+    jsonText = jsonText.replace(/^```json\s*\n/, "").replace(/\n```\s*$/, "");
+  } else if (jsonText.startsWith("```")) {
+    jsonText = jsonText.replace(/^```\s*\n/, "").replace(/\n```\s*$/, "");
+  }
+
+  try {
+    const suggestions = JSON.parse(jsonText);
+    if (Array.isArray(suggestions)) return suggestions.slice(0, 3);
+  } catch {
+    const arrayMatch = jsonText.match(/\[[\s\S]*?\]/);
+    if (arrayMatch) return JSON.parse(arrayMatch[0]).slice(0, 3);
+  }
+
+  return [];
+};
+
+
+export const generatePartnerResponse = async (
+  conversationMessages: (typeof messages.$inferSelect)[],
+  partnerName: string,
+  partnerGoals: string[],
+  userGoals: string[]
+): Promise<string> => {
+  const recentMessages = conversationMessages.slice(-10);
+  const conversationContext = recentMessages
+    .map((m) => m.content)
+    .join("\n");
+
+  const prompt = `You are ${partnerName}, a learning partner on a study platform.
+
+Your learning goals: ${partnerGoals.join(", ")}
+Your study partner's goals: ${userGoals.join(", ")}
+
+Recent conversation:
+${conversationContext}
+
+Respond naturally as ${partnerName} in Spanish, as a friendly study partner. 
+Keep your response short (1-3 sentences), conversational, and relevant to the learning goals.
+Do NOT mention you are an AI. Just respond naturally as a person would.`;
+
+  const { text } = await generateText({
+    model: groq("llama-3.3-70b-versatile"),
+    prompt,
+  });
+
+  return text.trim();
 };

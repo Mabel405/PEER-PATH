@@ -15,9 +15,9 @@ export const useAiPartners = () => {
       return res.json();
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: ["potentialPartners", variables],
-      });
+      queryClient.invalidateQueries({ queryKey: ["potentialPartners", variables] });
+      queryClient.invalidateQueries({ queryKey: ["matches"] });      // ✅
+      queryClient.invalidateQueries({ queryKey: ["allMatches"] });   // ✅ dashboard
     },
     onError: (error) => {
       console.error("Error finding ai partner", error);
@@ -30,7 +30,6 @@ export const useMatches = () => {
     queryKey: ["matches"],
     queryFn: async () => {
       const res = await client.api.matches["allmatches"].$get();
-
       if (!res.ok) {
         throw new Error("Failed to fetch potential matches");
       }
@@ -53,9 +52,8 @@ export const useAcceptMatch = () => {
       return res.json();
     },
     onSuccess: (_, matchId) => {
-      queryClient.invalidateQueries({
-        queryKey: ["matches"],
-      });
+      queryClient.invalidateQueries({ queryKey: ["matches"] });
+      queryClient.invalidateQueries({ queryKey: ["allMatches"] }); // ✅ dashboard
       router.push(`/chat/${matchId}`);
     },
     onError: (error) => {

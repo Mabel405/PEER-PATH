@@ -1,4 +1,4 @@
-import { LockIcon, PlusIcon } from "lucide-react";
+import { LockIcon, PlusIcon, Loader2Icon } from "lucide-react";
 import { Button } from "../ui/button";
 import { useState } from "react";
 import { Textarea } from "../ui/textarea";
@@ -45,18 +45,23 @@ export default function AddLearningGoal({
             <Button
               size="sm"
               onClick={handleCreateGoal}
-              disabled={
-                createGoalMutation.isPending ||
-                newGoalText.length === 0 ||
-                showLockIcon
-              }
+              disabled={createGoalMutation.isPending || newGoalText.length === 0 || showLockIcon}
             >
-              Agregar Meta
+              {/* ✅ Loading spinner */}
+              {createGoalMutation.isPending ? (
+                <>
+                  <Loader2Icon className="size-4 animate-spin mr-1" />
+                  Agregando...
+                </>
+              ) : (
+                "Agregar Meta"
+              )}
             </Button>
             <Button
               size="sm"
-              variant={"outline"}
+              variant="outline"
               onClick={() => setShowNewGoalForm(false)}
+              disabled={createGoalMutation.isPending}
             >
               Cancelar
             </Button>
@@ -64,14 +69,12 @@ export default function AddLearningGoal({
         </div>
       ) : (
         <Button
-          variant={"outline"}
+          variant="outline"
           className="w-full"
           onClick={() => setShowNewGoalForm(true)}
           disabled={showLockIcon}
         >
-          {showLockIcon && (
-            <LockIcon className="size-4 text-muted-foreground" />
-          )}
+          {showLockIcon && <LockIcon className="size-4 text-muted-foreground" />}
           <PlusIcon className="size-3" /> Agregar Meta de Aprendizaje
         </Button>
       )}

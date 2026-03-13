@@ -13,9 +13,9 @@ const outfitFont = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "Meetsy",
+  title: "Peer Path",
   description:
-    "Meetsy is a ai learning platform to connect with other learners in the community",
+    "Peer Path is a ai learning platform to connect with other learners in the community",
 };
 
 export default function RootLayout({

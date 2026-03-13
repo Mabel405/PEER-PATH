@@ -1,3 +1,4 @@
+// dashboard/page.tsx
 "use client";
 import StatsCard from "@/components/dashboard/stats-card";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,7 @@ import Link from "next/link";
 
 export default function DashboardPage() {
   const user = useUser();
+
   const {
     data: userCommunities,
     isLoading: isLoadingUserCommunities,
@@ -26,9 +28,7 @@ export default function DashboardPage() {
     queryKey: ["communities"],
     queryFn: async () => {
       const res = await client.api.communities.$get();
-      if (!res.ok) {
-        throw new Error("Error al obtener las comunidades");
-      }
+      if (!res.ok) throw new Error("Error al obtener las comunidades");
       return res.json();
     },
   });
@@ -37,9 +37,7 @@ export default function DashboardPage() {
     queryKey: ["allMatches"],
     queryFn: async () => {
       const res = await client.api.matches["allmatches"].$get();
-      if (!res.ok) {
-        throw new Error("Error al obtener los matches pendientes");
-      }
+      if (!res.ok) throw new Error("Error al obtener los matches");
       return res.json();
     },
   });
@@ -51,23 +49,24 @@ export default function DashboardPage() {
     (match) => match.status === "accepted"
   );
 
+  // ✅ Suma goals de todas las comunidades del usuario
   const { data: learningGoals } = useQuery({
-    queryKey: ["communityGoals"],
+    queryKey: ["communityGoals", "all"],
     queryFn: async () => {
-      const res = await client.api.communities.goals.$get();
-      if (!res.ok) {
-        throw new Error("Error al obtener los objetivos de aprendizaje");
-      }
-      return res.json();
+      if (!userCommunities?.length) return [];
+      const results = await Promise.all(
+        userCommunities.map((c) =>
+          client.api.communities[":communityId"].goals
+            .$get({ param: { communityId: c.community.id } })
+            .then((r) => r.json())
+        )
+      );
+      return results.flat();
     },
     enabled: !!userCommunities?.length,
   });
 
-  const {
-    data: matches,
-    isLoading: isLoadingMatches,
-    error: errorMatches,
-  } = useMatches();
+  const { data: matches } = useMatches();
 
   if (isLoadingUserCommunities) return <div>Cargando...</div>;
   if (errorUserCommunities)
@@ -85,14 +84,13 @@ export default function DashboardPage() {
       <Card className="border-primary">
         <CardHeader>
           <CardTitle>
-            🎉 Tienes {pendingMatchesData?.length}{" "}
+            🎉 Tienes {pendingMatchesData?.length ?? 0}{" "}
             {pendingMatchesData?.length === 1 ? "nuevo match" : "nuevos matches"}!
           </CardTitle>
           <CardDescription>
             Revisa y acepta tus matches para comenzar a chatear
           </CardDescription>
         </CardHeader>
-
         <CardContent>
           <Link href="/chat">
             <Button>Revisar Matches</Button>
@@ -103,19 +101,19 @@ export default function DashboardPage() {
       <div className="grid gap-4 md:grid-cols-4">
         <StatsCard
           title="Tus comunidades"
-          value={userCommunities?.length || 2}
+          value={userCommunities?.length ?? 0}
         />
         <StatsCard
           title="Objetivos de aprendizaje"
-          value={learningGoals?.length || 3}
+          value={learningGoals?.length ?? 0}
         />
         <StatsCard
           title="Matches activos"
-          value={activeMatchesData?.length || 2}
+          value={activeMatchesData?.length ?? 0}
         />
         <StatsCard
           title="Matches pendientes"
-          value={pendingMatchesData?.length || 1}
+          value={pendingMatchesData?.length ?? 0}
         />
       </div>
 
@@ -136,7 +134,6 @@ export default function DashboardPage() {
             </div>
             <CardDescription>Conversaciones de las que formas parte</CardDescription>
           </CardHeader>
-
           <CardContent>
             <div className="flex flex-col gap-3">
               {matches?.map((match) => (
@@ -184,7 +181,6 @@ export default function DashboardPage() {
             </div>
             <CardDescription>Comunidades de las que formas parte</CardDescription>
           </CardHeader>
-
           <CardContent>
             <div className="space-y-3">
               {userCommunities?.map((community) => (

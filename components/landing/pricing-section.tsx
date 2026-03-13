@@ -9,7 +9,16 @@ export default function PricingSection() {
         description="Elige el plan que mejor se adapte a ti. Empieza gratis y mejora cuando lo necesites."
       />
       <div className="max-w-6xl mx-auto">
-        <PricingTable />
+        <PricingTable
+          checkoutProps={{
+            appearance: {
+              variables: {
+                colorPrimary: "#06b6d4",
+                borderRadius: "0.5rem",
+              },
+            },
+          }}
+        />
       </div>
     </section>
   );

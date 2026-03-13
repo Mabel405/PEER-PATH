@@ -1,3 +1,4 @@
+// use-communities.ts
 import { client } from "@/lib/api-client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -62,6 +63,7 @@ export const useJoinCommunity = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["communities"] });
       queryClient.invalidateQueries({ queryKey: ["allCommunities"] });
+      queryClient.invalidateQueries({ queryKey: ["communityGoals"] }); // ✅
     },
     onError: (error) => {
       console.error("Error al unirse a la comunidad", error);
@@ -69,7 +71,6 @@ export const useJoinCommunity = () => {
   });
 };
 
-// NUEVO: Hook para abandonar comunidad
 export const useLeaveCommunity = () => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -85,6 +86,7 @@ export const useLeaveCommunity = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["communities"] });
       queryClient.invalidateQueries({ queryKey: ["allCommunities"] });
+      queryClient.invalidateQueries({ queryKey: ["communityGoals"] }); // ✅
       toast.success("Has abandonado la comunidad exitosamente");
     },
     onError: (error) => {
